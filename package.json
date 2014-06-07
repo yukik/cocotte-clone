@@ -1,0 +1,25 @@
+{
+  "name": "cocotte-clone",
+  "description": "データソース",
+  "homepage": "https://github.com/yukik",
+  "keywords": ["cocotte", "m2r"],
+  "author": "Yuki Kurata <yuki.kurata@gmail.com>",
+  "dependencies": {},
+  "devDependencies": {
+    "cocotte-compare" : "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/yukik/cocotte-clone.git"
+  },
+  "main": "clone.js",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node ./test/test.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "readmeFilename": "README.md",
+  "license": "MIT"
+}
