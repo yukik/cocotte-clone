@@ -46,7 +46,94 @@ var original = {
   g: new Date(),
   h: [1, 2, {x: 1}]
 };
-
 assert(compare(clone(original), original));
+
+// 配列連結
+assert(compare(clone([1, 2, 3], 4, 5), [1, 2, 3, 4, 5]));
+
+// オブジェクト上書き
+var m1 = {a: 1};
+var m2 = {b: 1};
+var m3 = {a: 2};
+var m4 = {a: 2, b: 1};
+assert.deepEqual(clone(m1,m2,m3), m4);
+
+// オブジェクト上書き２
+var m5 = {a: {b: 1}};
+var m6 = {a: {c: 2}};
+var m7 = {a: {b: 3}};
+var m8 = {a: {b: 3, c: 2}};
+assert.deepEqual(clone(m5,m6,m7), m8);
+
+// オブジェクト上書き(自己参照)
+var m9  = {a: 1};
+var m10 = {a: 2};
+m10.b = m10;
+var m11 = {a: 2};
+m11.b = m11;
+assert(compare(clone(m9,m10), m11));
+
+var ob1 = {
+  a: 1,
+  b: [1, 2, [3, 4, 5]],
+  c: {
+    d: new Date('2014-7-7'),
+    e: {
+      f: true,
+      g: /^abc$/i
+    }
+  }
+};
+
+var ob2 = {
+  b: null,
+  c: {
+    e: {
+      f: false,
+    }
+  }
+};
+
+var ob3 = {
+  a: 1,
+  b: null,
+  c: {
+    d: new Date('2014-7-7'),
+    e: {
+      f: false,
+      g: /^abc$/i
+    }
+  }
+};
+
+assert.deepEqual(clone(ob1, ob2), ob3);
+
+
+
+var obj1 = {
+  a: 1,
+  b: {
+    c: 2,
+    d: 3
+  }
+};
+var obj2 = {
+  a: 4,
+  b: {
+    c: 5
+  }
+};
+var obj3 = {
+  a: 4,
+  b: {
+    c: 5,
+    d: 3
+  }
+};
+assert.deepEqual(clone(obj1, obj2), obj3); // pass
+
+
+
+
 
 console.log('test ok');

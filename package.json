@@ -1,7 +1,7 @@
 {
   "name": "cocotte-clone",
   "description": "deep copy",
-  "homepage": "https://github.com/yukik",
+  "homepage": "https://github.com/yukik/cocotte-clone",
   "keywords": ["cocotte", "tools", "m2r"],
   "author": "Yuki Kurata <yuki.kurata@gmail.com>",
   "dependencies": {},
@@ -13,7 +13,7 @@
     "url": "git://github.com/yukik/cocotte-clone.git"
   },
   "main": "clone.js",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "scripts": {
     "test": "node ./test/test.js"
   },
