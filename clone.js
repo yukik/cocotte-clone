@@ -19,19 +19,9 @@ function cp (val) {
       typeof val === 'function') {
     return val;
   }
-
-  var constructor = Object.getPrototypeOf(val).constructor;
-
-  if (constructor === RegExp) {
-    var att = String(val).slice(val.source.length + 2);
-    return new RegExp(val.source, att);
-  }
-
-  if (constructor === Date) {
-    return new Date(val.getTime());
-  }
-
   var self = this;
+  var rtn;
+  var Ctor = Object.getPrototypeOf(val).constructor;
 
   // 循環参照対策
   var idx = self.obj1.indexOf(val);
@@ -39,22 +29,59 @@ function cp (val) {
     return self.obj2[idx];
   }
 
-  var rtn = constructor === Array ? [] : {};
-  this.obj1.push(val);
-  this.obj2.push(rtn);
+  if (Ctor === Boolean || Ctor === Number || Ctor === String) {
+    rtn = new Ctor(val.valueOf());
+  } else if (Ctor === RegExp || Ctor === Date) {
+    rtn = new Ctor(val);
+  } else if (val instanceof Error) {
+    rtn = new Ctor(val.message);
+  }
 
-  if (constructor === Array) {
+  if (rtn) {
+    self.obj2.push(rtn);
+    self.obj1.push(val);
+    return rtn;
+  }
+
+  rtn = Ctor === Array ? [] : {};
+
+  self.obj2.push(rtn);
+  self.obj1.push(val);
+
+  if (Ctor === Array) {
     val.forEach(function(x) {
       rtn.push(self.cp(x));
     });
 
   } else {
-    Object.keys(val).forEach(function(x){
-      rtn[x] = self.cp(val[x]);
-    });
+    self.cp2 (val, rtn);
 
   }
   return rtn;
+}
+
+function cp2 (val, rtn) {
+  var self = this;
+  var proto = Object.getPrototypeOf(val);
+  var names = Object.getOwnPropertyNames(val);
+  
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(rtn, proto);
+  } else {
+    rtn.__proto__ = proto;
+  }
+  names.forEach(function(name){
+    var pd = Object.getOwnPropertyDescriptor(val, name);
+    if ('value' in pd) {
+      var idx = self.obj1.indexOf(pd.value); // 循環参照対策
+      pd.value = ~idx ? self.obj2[idx] : self.cp(pd.value);
+    }
+    Object.defineProperty(rtn, name, pd);
+  });
+
+  if (!Object.isExtensible(val)) {
+    Object.preventExtensions(rtn);
+  }
 }
 
 /**
@@ -65,7 +92,8 @@ function cp (val) {
  */
 function single (val) {
   var self = {
-    cp: cp,
+    cp : cp,
+    cp2: cp2,
     obj1: [], // 自己参照対策
     obj2: []
   };
@@ -89,9 +117,9 @@ function isPureObject (value) {
  * @method merge
  * @param  {Object} target
  * @param  {String} key
- * @param  {Mixed} value
- * @param  {Array} obj1
- * @param  {Array} obj2
+ * @param  {Mixed}  value
+ * @param  {Array}  obj1
+ * @param  {Array}  obj2
  * @return {Object}
  */
 function merge (target, key, value, obj1, obj2) {
@@ -149,7 +177,8 @@ function cloneObject (params) {
     obj1 = [rtn];
     obj2 = [tmp];
     var keys = Object.keys(tmp);
-    for(var j = 0; j< keys.length; j++) {
+    var len2 = keys.length;
+    for(var j = 0; j < len2; j++) {
       var key = keys[j];
       merge(rtn, key, tmp[key], obj1, obj2);
     }
@@ -165,7 +194,7 @@ function cloneObject (params) {
  */
 function clone () {
   var len = arguments.length;
-
+  
   // 引数無し
   if (len === 0) {
     return void 0;
